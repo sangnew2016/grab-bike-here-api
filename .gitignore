@@ -1,0 +1,5 @@
+*/.suo
+**/*/.suo
+.vs/WebApi/DesignTimeBuild/.dtbcache.v2
+**/bin/*
+**/obj/*
