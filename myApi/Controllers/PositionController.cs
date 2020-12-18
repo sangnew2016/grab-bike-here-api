@@ -41,7 +41,8 @@ namespace myApi.Controllers
             var currentPosition = Singleton.PositionTree[email];
 
             var positions = Singleton.PositionTree
-                .Where(p => p.Value.UserType == "driver" && Distance(currentPosition, p.Value) <= 500)
+                .Where(p => p.Value.UserType == "driver" 
+                    && Distance(currentPosition, p.Value) <= 500)           // with Driver: no need BookId
                 .Select(p => p.Value).ToList();            
 
             return positions;            
@@ -58,7 +59,10 @@ namespace myApi.Controllers
             var currentPosition = Singleton.PositionTree[email];
 
             var positions = Singleton.PositionTree
-                .Where(p => p.Value.UserType == "user" && Distance(currentPosition, p.Value) <= radius)
+                .Where(p => p.Value.UserType == "user" 
+                    && Distance(currentPosition, p.Value) <= radius
+                    && p.Value.DriverTaken is null                          // with User: not captured by driver yet
+                    && p.Value.BookId > 0)                                  // with User: should have BookId
                 .Select(p => p.Value).ToList();
 
             return positions;            

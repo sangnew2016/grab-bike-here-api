@@ -53,6 +53,20 @@ namespace myApi.Controllers
 
             var bookId = _Data.BaseMYSQL.GetScalarValue(sql);
 
+            var email = Convert.ToString(_Data.BaseMYSQL.GetScalarValue(@$"
+                SELECT EMAIL FROM accounts where id = {bookABike.UserBookId};"
+            ));
+
+            // update Dictionary (support Driver manage user position)
+            if (Singleton.PositionTree.ContainsKey(email))
+            {
+                Singleton.PositionTree[email].BookId = Convert.ToInt32(bookId);
+            }
+            else
+            {
+                throw new Exception($"Api: This email '{email}' does not esits in Dictionary");
+            }
+
             return Ok(new { bookId });
         }
     }

@@ -8,6 +8,9 @@ namespace myApi.DTO
         public string UserType { get; set; }
         public string Latitude { get; set; }
         public string Longtitude { get; set; }
+
+        public string DriverTaken { get; set; }
+        public int BookId { get; set; }                             // BookId
     }
 
     public sealed class Singleton
