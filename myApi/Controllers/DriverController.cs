@@ -40,32 +40,48 @@ namespace myApi.Controllers
                     '{userPosition.DriverTaken}', 
                     NOW()
                 );
-
-                SELECT LAST_INSERT_ID();
+                
+                SELECT 
+                    A.Email, 
+                    A.phone, 
+                    LAST_INSERT_ID() as orderId, 
+                    (SELECT email FROM `accounts` WHERE id = '{userPosition.DriverTaken}') as DriverEmail
+                FROM `accounts` A inner join `bookings` B on A.id = B.user_book_id 
+                WHERE B.id = '{userPosition.BookId}';
 
                 COMMIT;
             ";
+            
+            var accountDatable = _Data.BaseMYSQL.getDataTable(sql);
+            if (accountDatable.Rows.Count <= 0) {
+                throw new Exception($"Api: Query Account with bookId '{userPosition.BookId}' failed. Check your data again");
+            }
+            var email = Convert.ToString(accountDatable.Rows[0]["email"]);
+            var phone = Convert.ToString(accountDatable.Rows[0]["phone"]);
+            var orderId = Convert.ToString(accountDatable.Rows[0]["orderId"]);
+            var driverEmail = Convert.ToString(accountDatable.Rows[0]["DriverEmail"]);
 
-            var orderId = _Data.BaseMYSQL.GetScalarValue(sql);
-
-            var email = Convert.ToString(_Data.BaseMYSQL.GetScalarValue(@$"
-                SELECT A.Email 
-                FROM `accounts` A inner join `bookings` B on A.id = B.user_book_id 
-                WHERE B.id = '{userPosition.BookId}';"
-            ));
-
-            // update Dictionary (support Driver manage user position)
+            // update Dictionary of User (support Driver manage user position)
             if (Singleton.PositionTree.ContainsKey(email))
             {
-                Singleton.PositionTree[email].DriverTaken = userPosition.DriverTaken;
+                Singleton.PositionTree[email].DriverTaken = userPosition.DriverTaken;                                
             }
             else
             {
                 throw new Exception($"Api: This email '{email}' does not esits in Dictionary");
             }
 
-
-            return Ok(new { orderId });
+            // update Dictionary of Driver (support User found Driver position)
+            if (Singleton.PositionTree.ContainsKey(driverEmail))
+            {
+                Singleton.PositionTree[driverEmail].CombineEmail = email + "___" + driverEmail;
+            }
+            else
+            {
+                throw new Exception($"Api: This email '{email}' does not esits in Dictionary");
+            }
+                        
+            return Ok(new { orderId, phone, email });
         }
     }
 }

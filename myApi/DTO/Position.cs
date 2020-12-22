@@ -9,7 +9,8 @@ namespace myApi.DTO
         public string Latitude { get; set; }
         public string Longtitude { get; set; }
 
-        public string DriverTaken { get; set; }
+        public string DriverTaken { get; set; }                     // Id
+        public string CombineEmail { get; set; }                    // combine email: User___Driver
         public int BookId { get; set; }                             // BookId
     }
 
